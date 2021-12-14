@@ -1,6 +1,6 @@
 const Router = require('express');
 const { check } = require('express-validator');
-const userControllers = require('../controllers/user');
+const userControllers = require('../controllers/user-controller');
 
 const router = new Router();
 
@@ -14,5 +14,8 @@ router.post('/registration', [
 ]);
 
 router.post('/login', userControllers.login);
+router.post('/logout', userControllers.logout);
+router.get('/activate/:link', userControllers.activate);
+router.get('/refresh', userControllers.refresh);
 
 module.exports = router;
