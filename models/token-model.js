@@ -1,6 +1,6 @@
 const { Schema, model, ObjectId } = require('mongoose');
 const Token = new Schema({
-  token: { type: ObjectId, ref: 'User' },
+  user: { type: ObjectId, ref: 'User' },
   refreshToken: { type: String, required: true },
 });
 
