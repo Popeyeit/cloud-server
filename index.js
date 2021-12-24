@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
 require('dotenv').config();
 const authRouter = require('./routes/auth-routes');
+const fileRouter = require('./routes/file-routes');
 const errorMiddleware = require('./middlewares/error-middleware');
 
 const app = express();
@@ -14,6 +15,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(cors());
 app.use('/api/auth', authRouter);
+app.use('/api/files', fileRouter);
 app.use(errorMiddleware);
 
 const start = async () => {

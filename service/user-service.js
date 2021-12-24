@@ -1,8 +1,10 @@
 const UserModel = require('../models/user-model');
+const FileModel = require('../models/file-model');
 const bcrypt = require('bcryptjs');
 const uuid = require('uuid');
 const mailService = require('./mail-service');
 const tokenService = require('./token-service');
+const fileService = require('./file-service');
 const UserDto = require('../dtos/user-dto');
 const ApiError = require('../exceptions/api-error');
 
@@ -19,6 +21,9 @@ class UserService {
       password: hashPassword,
       activationLink,
     });
+
+    await fileService.createDir(new FileModel({ user: user.id, name: '' }));
+
     await mailService.sendActivationMail(
       email,
       `${process.env.API_URL}/api/auth/activate/${activationLink}`,

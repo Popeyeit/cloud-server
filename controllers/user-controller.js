@@ -1,13 +1,18 @@
 const { validationResult } = require('express-validator');
 const userService = require('../service/user-service');
+const ApiError = require('../exceptions/api-error');
+
+// TODO: Create reset password.
 
 class UserController {
   async registration(req, res, next) {
     try {
       const errors = validationResult(req);
+
       if (!errors.isEmpty()) {
-        return res.status(400).json({ message: 'Incorrect request', errors });
+        throw ApiError.notValidRequest(errors);
       }
+
       const { email, password } = req.body;
       const userData = await userService.registration(email, password);
       res.cookie('refreshToken', userData.refreshToken, {
@@ -36,7 +41,7 @@ class UserController {
   async logout(req, res, next) {
     try {
       const { refreshToken } = req.cookies;
-      const token = await userService.logout(refreshToken);
+      await userService.logout(refreshToken);
       res.clearCookie('refreshToken');
       return res.send();
     } catch (error) {
