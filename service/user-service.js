@@ -1,12 +1,12 @@
-const UserModel = require('../models/user-model');
-const FileModel = require('../models/file-model');
-const bcrypt = require('bcryptjs');
-const uuid = require('uuid');
-const mailService = require('./mail-service');
-const tokenService = require('./token-service');
-const fileService = require('./file-service');
-const UserDto = require('../dtos/user-dto');
-const ApiError = require('../exceptions/api-error');
+const UserModel = require("../models/user-model");
+const FileModel = require("../models/file-model");
+const bcrypt = require("bcryptjs");
+const uuid = require("uuid");
+const mailService = require("./mail-service");
+const tokenService = require("./token-service");
+const fileService = require("./file-service");
+const UserDto = require("../dtos/user-dto");
+const ApiError = require("../exceptions/api-error");
 
 class UserService {
   async registration(email, password) {
@@ -22,15 +22,15 @@ class UserService {
       activationLink,
     });
 
-    await fileService.createDir(new FileModel({ user: user.id, name: '' }));
+    await fileService.createDir(new FileModel({ user: user.id, name: "" }));
 
-    await mailService.sendActivationMail(
-      email,
-      `${process.env.API_URL}/api/auth/activate/${activationLink}`,
-    );
+    // await mailService.sendActivationMail(
+    //   email,
+    //   `${process.env.API_URL}/api/auth/activate/${activationLink}`,
+    // );
 
     const userDto = new UserDto(user);
-
+    // TODO: maybe delete user data after registration.
     const tokens = tokenService.generateTokens({ ...userDto });
     await tokenService.saveToken(userDto.id, tokens.refreshToken);
 
@@ -43,7 +43,7 @@ class UserService {
   async activate(activationLink) {
     const user = await UserModel.findOne({ activationLink });
     if (!user) {
-      throw ApiError.BadRequest('Not correct link');
+      throw ApiError.BadRequest("Not correct link");
     }
     user.isActivated = true;
     await user.save();
@@ -52,11 +52,14 @@ class UserService {
   async login(email, password) {
     const user = await UserModel.findOne({ email });
     if (!user) {
-      throw ApiError.BadRequest('User is not found');
+      throw ApiError.BadRequest("User is not found");
+    }
+    if (!user.isActivated) {
+      throw ApiError.BadRequest("User is not activated");
     }
     const isPassEquals = await bcrypt.compare(password, user.password);
     if (!isPassEquals) {
-      throw ApiError.BadRequest('Password is not correct');
+      throw ApiError.BadRequest("Password is not correct");
     }
     const userDto = new UserDto(user);
 

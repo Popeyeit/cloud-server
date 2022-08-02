@@ -25,7 +25,7 @@ class MailService {
       Activate your account on link
       </h1>
       <a href="${link}">
-      ${link}
+      Activate
       </a>
       </div>`,
     });

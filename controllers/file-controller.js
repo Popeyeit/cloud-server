@@ -1,6 +1,6 @@
-const { validationResult } = require('express-validator');
-const fileService = require('../service/file-service');
-const ApiError = require('../exceptions/api-error');
+const { validationResult } = require("express-validator");
+const fileService = require("../service/file-service");
+const ApiError = require("../exceptions/api-error");
 
 class FileController {
   async createDir(req, res, next) {
@@ -11,9 +11,6 @@ class FileController {
         throw ApiError.notValidRequest(errors);
       }
 
-      if (candidate) {
-        throw ApiError.BadRequest(`User with email ${email} already exist`);
-      }
       const { name, type, parent } = req.body;
       const user = req.user;
       const file = await fileService.createDirDb(name, type, parent, user);
@@ -30,6 +27,22 @@ class FileController {
     } catch (error) {
       next(error);
     }
+  }
+
+  async uploadFile(req, res, next) {
+    try {
+      const file = req.files.file;
+      const dbFile = await fileService.uploadFile(req, file);
+      res.json(dbFile);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async deleteFile(req, res, next) {
+    const fileId = req.query.id;
+    const userId = req.user.id;
+    constIsFileRemoved = await fileService.deleteFile(fileId, userId);
   }
 }
 
