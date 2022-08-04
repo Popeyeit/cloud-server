@@ -65,11 +65,10 @@ const FileService = class FileService {
       throw ApiError.BadRequest("File already exist");
     }
     file.mv(createdFilePath);
-
     const type = file.name.split(".").pop();
     let filePath = file.name;
     if (parent) {
-      filePath = parent.path = "\\" + file.name;
+      filePath = parent.path + "\\" + file.name;
     }
     const dbFile = new FileModel({
       name: file.name,
@@ -85,24 +84,40 @@ const FileService = class FileService {
     return dbFile;
   }
 
+  async downloadFile(req) {
+    const file = await FileModel.findOne({
+      _id: req.query.id,
+      user: req.user.id,
+    });
+
+    const createdPath = path.resolve(
+      "files",
+      req.user.id.toString(),
+      file.path
+    );
+    if (fs.existsSync(createdPath)) {
+      return { createdPath, file };
+    }
+    throw ApiError.BadRequest("Download error");
+  }
+
   async deleteFile(fileId, userId) {
+    //TODO: Implement ability to remove whole directory
     const file = await FileModel.findOne({
       _id: fileId,
       user: userId,
     });
+
     if (!file) {
       throw ApiError.BadRequest("File not found");
     }
-
     const path = this.getPath(file);
     if (file.type === "dir") {
       fs.rmdirSync(path);
     } else {
       fs.unlinkSync(path);
     }
-
     await file.remove();
-    return true;
   }
 
   getPath(file) {

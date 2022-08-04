@@ -39,10 +39,25 @@ class FileController {
     }
   }
 
+  async downloadFile(req, res, next) {
+    try {
+      const dbFile = await fileService.downloadFile(req);
+      const { createdPath: path, file } = dbFile;
+      return res.download(path, file.name);
+    } catch (e) {
+      next(error);
+    }
+  }
+
   async deleteFile(req, res, next) {
-    const fileId = req.query.id;
-    const userId = req.user.id;
-    constIsFileRemoved = await fileService.deleteFile(fileId, userId);
+    try {
+      const fileId = req.query.id;
+      const userId = req.user.id;
+      await fileService.deleteFile(fileId, userId);
+      res.json({ message: "File was deleted" });
+    } catch (error) {
+      next(error);
+    }
   }
 }
 

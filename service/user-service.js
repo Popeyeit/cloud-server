@@ -6,6 +6,7 @@ const mailService = require("./mail-service");
 const tokenService = require("./token-service");
 const fileService = require("./file-service");
 const UserDto = require("../dtos/user-dto");
+const UserResponseDto = require("../dtos/user-response-dto");
 const ApiError = require("../exceptions/api-error");
 
 class UserService {
@@ -30,13 +31,15 @@ class UserService {
     // );
 
     const userDto = new UserDto(user);
+    const userResponseDto = new UserResponseDto(user);
+
     // TODO: maybe delete user data after registration.
     const tokens = tokenService.generateTokens({ ...userDto });
     await tokenService.saveToken(userDto.id, tokens.refreshToken);
 
     return {
       ...tokens,
-      user: userDto,
+      user: userResponseDto,
     };
   }
 
@@ -62,13 +65,14 @@ class UserService {
       throw ApiError.BadRequest("Password is not correct");
     }
     const userDto = new UserDto(user);
+    const userResponseDto = new UserResponseDto(user);
 
     const tokens = tokenService.generateTokens({ ...userDto });
     await tokenService.saveToken(userDto.id, tokens.refreshToken);
 
     return {
       ...tokens,
-      user: userDto,
+      user: userResponseDto,
     };
   }
 
@@ -82,6 +86,7 @@ class UserService {
       throw ApiError.UnauthorizedError();
     }
     const userData = tokenService.validateRefreshToken(refreshToken);
+
     const tokenFromDb = await tokenService.findToken(refreshToken);
 
     if (!userData || !tokenFromDb) {
@@ -89,13 +94,14 @@ class UserService {
     }
     const user = await UserModel.findById(userData.id);
     const userDto = new UserDto(user);
+    const userResponseDto = new UserResponseDto(user);
 
     const tokens = tokenService.generateTokens({ ...userDto });
     await tokenService.saveToken(userDto.id, tokens.refreshToken);
 
     return {
       ...tokens,
-      user: userDto,
+      user: userResponseDto,
     };
   }
 
