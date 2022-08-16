@@ -22,7 +22,12 @@ class FileController {
 
   async getFiles(req, res, next) {
     try {
-      const files = await fileService.getFiles(req.user.id, req.query.parent);
+      const { sort } = req.query;
+      const files = await fileService.getFiles(
+        req.user.id,
+        req.query.parent,
+        sort
+      );
       return res.json(files);
     } catch (error) {
       next(error);
@@ -57,6 +62,35 @@ class FileController {
       res.json({ message: "File was deleted" });
     } catch (error) {
       next(error);
+    }
+  }
+
+  async searchFile(req, res, next) {
+    try {
+      const searchName = req.query.search;
+      const files = await fileService.searchFile(req.user.id, searchName);
+      return res.json(files);
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async uploadAvatar(req, res, next) {
+    try {
+      const file = req.files.file;
+      const user = await fileService.uploadAvatar(req.user.id, file);
+      res.json(user);
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  async deleteAvatar(req, res, next) {
+    try {
+      const user = await fileService.deleteAvatar(req.user.id);
+      return res.json(user);
+    } catch (e) {
+      next(e);
     }
   }
 }

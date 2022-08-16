@@ -13,8 +13,11 @@ router.post(
 );
 
 router.post("/upload", authMiddleware, fileControllers.uploadFile);
+router.post("/avatar", authMiddleware, fileControllers.uploadAvatar);
 router.get("", authMiddleware, fileControllers.getFiles);
 router.delete("/", authMiddleware, fileControllers.deleteFile);
+router.delete("/avatar", authMiddleware, fileControllers.deleteAvatar);
 router.get("/download", authMiddleware, fileControllers.downloadFile);
+router.get("/search", authMiddleware, fileControllers.searchFile);
 
 module.exports = router;

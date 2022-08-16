@@ -1,7 +1,9 @@
 const fs = require("fs");
 const path = require("path");
+const ApiError = require("../exceptions/api-error");
 const FileModel = require("../models/file-model");
 const UserModel = require("../models/user-model");
+const Uuid = require("uuid");
 
 const FileService = class FileService {
   async createDir(file) {
@@ -33,10 +35,17 @@ const FileService = class FileService {
     return file;
   }
 
-  async getFiles(user, parent) {
-    const files = await FileModel.find({ user, parent });
-
-    return files;
+  async getFiles(user, parent, sort) {
+    switch (sort) {
+      case "name":
+        return await FileModel.find({ user, parent }).sort({ name: 1 });
+      case "type":
+        return await FileModel.find({ user, parent }).sort({ type: 1 });
+      case "date":
+        return await FileModel.find({ user, parent }).sort({ date: -1 });
+      default:
+        return await FileModel.find({ user, parent });
+    }
   }
 
   async uploadFile(req, file) {
@@ -122,6 +131,32 @@ const FileService = class FileService {
 
   getPath(file) {
     return path.resolve("files", file.user.toString(), file.path);
+  }
+
+  async searchFile(user, searchName) {
+    let files = await FileModel.find({ user });
+    files = files.filter((file) => file.name.includes(searchName));
+    return files;
+  }
+
+  async uploadAvatar(userId, file) {
+    const user = await UserModel.findById(userId);
+    const avatarName = Uuid.v4() + ".jpg";
+    const createdFilePath = path.resolve("static", avatarName);
+    file.mv(createdFilePath);
+    user.avatar = avatarName;
+    await user.save();
+
+    return user;
+  }
+
+  async deleteAvatar(userId) {
+    const user = await UserModel.findById(userId);
+    fs.unlinkSync(path.resolve("static", user.avatar));
+    user.avatar = null;
+    await user.save();
+
+    return user;
   }
 };
 
